@@ -13,6 +13,8 @@ import flixel.math.FlxRect;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import openfl.display.BlendMode;
+import openfl.display3D.Context3DWrapMode;
+import openfl.display3D.Context3DCompareMode;
 import openfl.filters.BitmapFilter;
 import openfl.geom.ColorTransform;
 import openfl.media.Sound;

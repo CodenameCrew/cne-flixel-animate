@@ -11,6 +11,8 @@ import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxPool;
 import openfl.display.BlendMode;
+import openfl.display3D.Context3DWrapMode;
+import openfl.display3D.Context3DCompareMode;
 import openfl.geom.ColorTransform;
 import openfl.geom.Matrix;
 
@@ -22,6 +24,7 @@ class AnimateElement<T> implements IFlxDestroyable
 {
 	public var blend:BlendMode;
 	public var shader:FlxShader;
+	public var wrapMode:Context3DWrapMode;
 	public var matrix:FlxMatrix;
 	public var visible:Bool;
 	public var elementType(default, null):ElementType;
@@ -144,6 +147,7 @@ class AnimateElement<T> implements IFlxDestroyable
 		_transform = null;
 		parentFrame = null;
 		shader = null;
+		wrapMode = null;
 		drawCommand = FlxDestroyUtil.destroy(drawCommand);
 	}
 }
