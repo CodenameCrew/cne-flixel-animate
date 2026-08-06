@@ -46,6 +46,16 @@ class FlxAnimate extends FlxSprite
 	public var skew(default, null):FlxPoint;
 
 	/**
+	 * The matrix to use for rendering if `matrixExposed` is true.
+	 */
+	public var transformMatrix(default, null):FlxMatrix;
+
+	/**
+	 * Whether to draw the matrix exposed with `transformMatrix`.
+	 */
+	public var matrixExposed:Bool = false;
+
+	/**
 	 * Class that handles adding and playing animations on this sprite.
 	 * Can be interchanged or act as a replacement of ``animation``.
 	 * Only exists as a way to access missing add animation functions for Texture Atlas.
@@ -138,6 +148,7 @@ class FlxAnimate extends FlxSprite
 		super.initVars();
 		anim = new FlxAnimateController(this);
 		skew = new FlxPoint();
+		transformMatrix = new FlxMatrix();
 		animation = anim;
 	}
 
@@ -198,7 +209,7 @@ class FlxAnimate extends FlxSprite
 		#if flash
 		return false;
 		#else
-		return isAnimate && useRenderTexture && (alpha != 1 || shader != null || (blend != null && blend != NORMAL));
+		return isAnimate && useRenderTexture && (layer != null || alpha != 1 || shader != null || (blend != null && blend != NORMAL));
 		#end
 	}
 
@@ -239,12 +250,17 @@ class FlxAnimate extends FlxSprite
 				_renderTextureDirty = false;
 			}
 
-			camera.drawPixels(_renderTexture.graphic.imageFrame.frame, framePixels, matrix, colorTransform, blend, antialiasing, shader);
+			if (layer != null)
+				layer.drawPixels(this, camera, _renderTexture.graphic.imageFrame.frame, framePixels, matrix, colorTransform, blend,
+					antialiasing, shaderEnabled ? shader : null);
+			else
+				camera.drawPixels(_renderTexture.graphic.imageFrame.frame, framePixels, matrix, colorTransform, blend, antialiasing,
+					shaderEnabled ? shader : null);
 		}
 		else
 		#end
 		{
-			timeline.draw(camera, matrix, colorTransform, blend, antialiasing, shader);
+			timeline.draw(camera, matrix, colorTransform, blend, antialiasing, shaderEnabled ? shader : null);
 		}
 	}
 
@@ -277,7 +293,11 @@ class FlxAnimate extends FlxSprite
 
 		frame.prepareMatrix(matrix, FlxFrameAngle.ANGLE_0, checkFlipX(), checkFlipY());
 		prepareDrawMatrix(matrix, camera);
-		camera.drawPixels(frame, framePixels, matrix, colorTransform, blend, antialiasing, shader);
+
+		if (layer != null)
+			layer.drawPixels(this, camera, frame, framePixels, matrix, colorTransform, blend, antialiasing, shaderEnabled ? shader : null);
+		else
+			camera.drawPixels(frame, framePixels, matrix, colorTransform, blend, antialiasing, shaderEnabled ? shader : null);
 	}
 
 	function prepareDrawMatrix(matrix:FlxMatrix, camera:FlxCamera):Void
@@ -298,18 +318,36 @@ class FlxAnimate extends FlxSprite
 		}
 
 		matrix.translate(-origin.x, -origin.y);
+		
+		if (frameOffsetAngle != null && frameOffsetAngle != angle)
+		{
+			var angleOff = (frameOffsetAngle - angle) * FlxAngle.TO_RAD;
+			var cos = Math.cos(angleOff);
+			var sin = Math.sin(angleOff);
+			// cos doesnt need to be negated
+			_matrix.rotateWithTrig(cos, -sin);
+			_matrix.translate(-frameOffset.x, -frameOffset.y);
+			_matrix.rotateWithTrig(cos, sin);
+		}
+		else
+			_matrix.translate(-frameOffset.x, -frameOffset.y);
+
 		matrix.scale(scale.x, scale.y);
 
-		if (angle != 0)
-		{
-			updateTrig();
-			matrix.rotateWithTrig(_cosAngle, _sinAngle);
-		}
-
-		if (skew.x != 0 || skew.y != 0)
-		{
-			updateSkew();
-			matrix.concat(_skewMatrix);
+		if (matrixExposed) matrix.concat(transformMatrix);
+		else {
+			//if (bakedRotationAngle <= 0) {
+				if (angle != 0)
+				{
+					updateTrig();
+					matrix.rotateWithTrig(_cosAngle, _sinAngle);
+				}
+			//}
+			if (skew.x != 0 || skew.y != 0)
+			{
+				updateSkew();
+				matrix.concat(_skewMatrix);
+			}
 		}
 
 		if (doStageMatrix && postStageMatrixApply)
@@ -317,9 +355,7 @@ class FlxAnimate extends FlxSprite
 			matrix.concat(library.matrix);
 		}
 
-		getScreenPosition(_point, camera);
-		_point.x += origin.x - offset.x;
-		_point.y += origin.y - offset.y;
+		getScreenPosition(_point, camera).subtractPoint(offset).add(origin.x, origin.y);
 		matrix.translate(_point.x, _point.y);
 
 		if (isPixelPerfectRender(camera))
@@ -493,5 +529,6 @@ class FlxAnimate extends FlxSprite
 		timeline = null;
 		stageBg = FlxDestroyUtil.destroy(stageBg);
 		skew = FlxDestroyUtil.put(skew);
+		transformMatrix = null;
 	}
 }

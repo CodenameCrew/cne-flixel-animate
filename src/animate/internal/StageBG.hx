@@ -41,6 +41,15 @@ class StageBG extends FlxSprite
 
 		mat.concat(parent._matrix);
 
-		camera.drawPixels(this._frame, this.framePixels, mat, this.colorTransform, parent.blend, false, parent.shader);
+		if (parent.layer != null)
+		{
+			parent.layer.drawPixels(parent, camera, this._frame, this.framePixels, mat, this.colorTransform, parent.blend,
+				false, parent.shaderEnabled ? parent.shader : null);
+		}
+		else
+		{
+			camera.drawPixels(this._frame, this.framePixels, mat, this.colorTransform, parent.blend, false,
+				parent.shaderEnabled ? parent.shader : null);
+		}
 	}
 }
