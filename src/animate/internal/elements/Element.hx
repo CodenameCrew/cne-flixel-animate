@@ -6,6 +6,8 @@ import flixel.math.FlxRect;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.util.FlxDestroyUtil;
 import openfl.display.BlendMode;
+import openfl.display3D.Context3DWrapMode;
+import openfl.display3D.Context3DCompareMode;
 import openfl.geom.ColorTransform;
 
 using flixel.util.FlxColorTransformUtil;
@@ -43,7 +45,7 @@ class AnimateElement<T> implements IFlxDestroyable
 	}
 
 	public function draw(camera:FlxCamera, index:Int, frameIndex:Int, parentMatrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?antialiasing:Bool,
-		?shader:FlxShader):Void {}
+		?shader:FlxShader, ?wrapMode:Context3DWrapMode, ?depthCompareMode:Context3DCompareMode):Void {}
 
 	public inline function toSymbolInstance():SymbolInstance
 		return cast this;

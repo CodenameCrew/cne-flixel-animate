@@ -11,6 +11,8 @@ import flixel.system.FlxAssets.FlxShader;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxSignal;
 import openfl.display.BlendMode;
+import openfl.display3D.Context3DWrapMode;
+import openfl.display3D.Context3DCompareMode;
 import openfl.geom.ColorTransform;
 
 using flixel.util.FlxColorTransformUtil;
@@ -56,11 +58,11 @@ class ButtonInstance extends SymbolInstance
 	}
 
 	override function draw(camera:FlxCamera, index:Int, frameIndex:Int, parentMatrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode,
-			?antialiasing:Bool, ?shader:FlxShader)
+			?antialiasing:Bool, ?shader:FlxShader, ?wrapMode:Context3DWrapMode, ?depthCompareMode:Context3DCompareMode)
 	{
 		updateButtonState(camera, parentMatrix);
 
-		super.draw(camera, index, frameIndex, parentMatrix, transform, blend, antialiasing, shader);
+		super.draw(camera, index, frameIndex, parentMatrix, transform, blend, antialiasing, shader, wrapMode, depthCompareMode);
 
 		#if FLX_DEBUG
 		if (FlxG.debugger.drawDebug && FlxAnimate.drawDebugLimbs)

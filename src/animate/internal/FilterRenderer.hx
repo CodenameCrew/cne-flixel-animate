@@ -205,7 +205,7 @@ class FilterRenderer
 			filteredBounds = expandFilterBounds(bounds.copyTo(FlxRect.get()), movieclip._filters);
 
 			mat.setTo(1 / scale.x, 0, 0, 1 / scale.y, 0, 0);
-			movieclip._drawTimeline(cam, frameIndex, 0, mat, null, NORMAL, false, null);
+			movieclip._drawTimeline(cam, frameIndex, 0, mat, null, NORMAL, false, null, null, null);
 			cam.render();
 
 			if (filters != null && filters.length > 0)
@@ -489,7 +489,7 @@ class FilterRenderer
 		@:privateAccess
 		var bitmap:BitmapData = getBitmap((cam, mat) ->
 		{
-			movieclip._drawTimeline(cam, frameIndex, 0, mat, null, NORMAL, false, null);
+			movieclip._drawTimeline(cam, frameIndex, 0, mat, null, NORMAL, false, null, null, null);
 		}, filteredBounds);
 
 		var frame = FlxGraphic.fromBitmapData(bitmap).imageFrame.frame;

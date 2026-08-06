@@ -12,6 +12,8 @@ import flixel.system.FlxAssets.FlxShader;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import openfl.display.BlendMode;
+import openfl.display3D.Context3DWrapMode;
+import openfl.display3D.Context3DCompareMode;
 import openfl.geom.ColorTransform;
 
 using flixel.util.FlxColorTransformUtil;
@@ -185,7 +187,7 @@ class SymbolInstance extends AnimateElement<SymbolInstanceJson>
 	}
 
 	override function draw(camera:FlxCamera, index:Int, frameIndex:Int, parentMatrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode,
-			?antialiasing:Bool, ?shader:FlxShader):Void
+			?antialiasing:Bool, ?shader:FlxShader, ?wrapMode:Context3DWrapMode, ?depthCompareMode:Context3DCompareMode):Void
 	{
 		if (isColored) // Concat symbol's color to the current color transform
 		{
@@ -211,16 +213,16 @@ class SymbolInstance extends AnimateElement<SymbolInstanceJson>
 		}
 
 		var b = Blend.resolve(this.blend, blend);
-		_drawTimeline(camera, index, frameIndex, parentMatrix, transform, b, antialiasing, shader);
+		_drawTimeline(camera, index, frameIndex, parentMatrix, transform, b, antialiasing, shader, wrapMode, depthCompareMode);
 	}
 
 	function _drawTimeline(camera:FlxCamera, index:Int, frameIndex:Int, parentMatrix:FlxMatrix, transform:Null<ColorTransform>, blend:Null<BlendMode>,
-			antialiasing:Null<Bool>, shader:Null<FlxShader>)
+			antialiasing:Null<Bool>, shader:Null<FlxShader>, wrapMode:Null<Context3DWrapMode>, depthCompareMode:Null<Context3DCompareMode>)
 	{
 		_mat.copyFrom(matrix);
 		_mat.concat(parentMatrix);
 		libraryItem.timeline.currentFrame = getFrameIndex(index, frameIndex);
-		libraryItem.timeline.draw(camera, _mat, transform, blend, antialiasing, shader);
+		libraryItem.timeline.draw(camera, _mat, transform, blend, antialiasing, shader, wrapMode, depthCompareMode);
 	}
 
 	function _setColorTransform(rMult:Float, gMult:Float, bMult:Float, aMult:Float, rOffset:Float, gOffset:Float, bOffset:Float, aOffset:Float)

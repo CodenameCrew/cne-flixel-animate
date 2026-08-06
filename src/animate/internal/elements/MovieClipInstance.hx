@@ -11,6 +11,8 @@ import flixel.math.FlxRect;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.util.FlxDestroyUtil;
 import openfl.display.BlendMode;
+import openfl.display3D.Context3DWrapMode;
+import openfl.display3D.Context3DCompareMode;
 import openfl.filters.BitmapFilter;
 import openfl.filters.BlurFilter;
 import openfl.geom.ColorTransform;
@@ -178,16 +180,17 @@ class MovieClipInstance extends SymbolInstance
 	}
 
 	override function draw(camera:FlxCamera, index:Int, frameIndex:Int, parentMatrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode,
-			?antialiasing:Bool, ?shader:FlxShader):Void
+			?antialiasing:Bool, ?shader:FlxShader, ?wrapMode:Context3DWrapMode, ?depthCompareMode:Context3DCompareMode):Void
 	{
 		if (_dirty)
 			_bakeFilters(_filters, getFrameIndex(index, frameIndex));
 
-		super.draw(camera, index, frameIndex, parentMatrix, transform, blend, antialiasing, shader);
+		super.draw(camera, index, frameIndex, parentMatrix, transform, blend, antialiasing, shader, wrapMode, depthCompareMode);
 	}
 
 	override function _drawTimeline(camera:FlxCamera, index:Int, frameIndex:Int, parentMatrix:FlxMatrix, transform:Null<ColorTransform>,
-			blend:Null<BlendMode>, antialiasing:Null<Bool>, shader:Null<FlxShader>)
+			blend:Null<BlendMode>, antialiasing:Null<Bool>, shader:Null<FlxShader>, wrapMode:Null<Context3DWrapMode>,
+			depthCompareMode:Null<Context3DCompareMode>)
 	{
 		if (_bakedFrames != null)
 		{
@@ -197,12 +200,12 @@ class MovieClipInstance extends SymbolInstance
 			if (bakedFrame != null)
 			{
 				if (bakedFrame.visible)
-					bakedFrame.draw(camera, 0, 0, parentMatrix, transform, blend, antialiasing, shader);
+					bakedFrame.draw(camera, 0, 0, parentMatrix, transform, blend, antialiasing, shader, wrapMode, depthCompareMode);
 				return;
 			}
 		}
 
-		super._drawTimeline(camera, index, frameIndex, parentMatrix, transform, blend, antialiasing, shader);
+		super._drawTimeline(camera, index, frameIndex, parentMatrix, transform, blend, antialiasing, shader, wrapMode, depthCompareMode);
 	}
 
 	override function destroy():Void

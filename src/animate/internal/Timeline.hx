@@ -12,6 +12,8 @@ import flixel.system.FlxAssets.FlxShader;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.typeLimit.OneOfTwo;
 import openfl.display.BlendMode;
+import openfl.display3D.Context3DWrapMode;
+import openfl.display3D.Context3DCompareMode;
 import openfl.geom.ColorTransform;
 
 using StringTools;
@@ -326,7 +328,8 @@ class Timeline implements IFlxDestroyable
 		}
 	}
 
-	public function draw(camera:FlxCamera, parentMatrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?antialiasing:Bool, ?shader:FlxShader)
+	public function draw(camera:FlxCamera, parentMatrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?antialiasing:Bool, ?shader:FlxShader,
+			?wrapMode:Context3DWrapMode, ?depthCompareMode:Context3DCompareMode)
 	{
 		var i = layers.length - 1;
 		while (i >= 0)
@@ -339,7 +342,7 @@ class Timeline implements IFlxDestroyable
 			if (frame == null)
 				continue;
 
-			frame.draw(camera, currentFrame, parentMatrix, transform, blend, antialiasing, shader);
+			frame.draw(camera, currentFrame, parentMatrix, transform, blend, antialiasing, shader, wrapMode, depthCompareMode);
 		}
 	}
 

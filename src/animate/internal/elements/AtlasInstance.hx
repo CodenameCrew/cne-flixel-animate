@@ -10,6 +10,8 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.system.FlxAssets.FlxShader;
 import openfl.display.BlendMode;
+import openfl.display3D.Context3DWrapMode;
+import openfl.display3D.Context3DCompareMode;
 import openfl.geom.ColorTransform;
 
 using flixel.util.FlxColorTransformUtil;
@@ -93,7 +95,7 @@ class AtlasInstance extends AnimateElement<AtlasInstanceJson>
 	}
 
 	override function draw(camera:FlxCamera, index:Int, frameIndex:Int, parentMatrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode,
-			?antialiasing:Bool, ?shader:FlxShader):Void
+			?antialiasing:Bool, ?shader:FlxShader, ?wrapMode:Context3DWrapMode, ?depthCompareMode:Context3DCompareMode):Void
 	{
 		if (frame == null || frame.frame == null) // should add a warn here
 			return;
@@ -114,7 +116,7 @@ class AtlasInstance extends AnimateElement<AtlasInstanceJson>
 		#if flash
 		drawPixelsFlash(camera, _mat, transform, blend, antialiasing);
 		#else
-		camera.drawPixels(frame, null, _mat, transform, blend, antialiasing, shader);
+		camera.drawPixels(frame, null, _mat, transform, blend, antialiasing, shader, wrapMode, depthCompareMode);
 		#end
 
 		#if FLX_DEBUG
@@ -236,9 +238,9 @@ class BakedInstance extends AtlasInstance
 	public var blend:BlendMode = null;
 
 	override function draw(camera:FlxCamera, index:Int, frameIndex:Int, parentMatrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode,
-			?antialiasing:Bool, ?shader:FlxShader)
+			?antialiasing:Bool, ?shader:FlxShader, ?wrapMode:Context3DWrapMode, ?depthCompareMode:Context3DCompareMode)
 	{
 		var b = Blend.resolve(this.blend, blend);
-		super.draw(camera, index, frameIndex, parentMatrix, transform, b, antialiasing, shader);
+		super.draw(camera, index, frameIndex, parentMatrix, transform, b, antialiasing, shader, wrapMode, depthCompareMode);
 	}
 }

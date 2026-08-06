@@ -9,6 +9,8 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import openfl.display.BlendMode;
+import openfl.display3D.Context3DWrapMode;
+import openfl.display3D.Context3DCompareMode;
 import openfl.geom.ColorTransform;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
@@ -104,7 +106,7 @@ class TextFieldInstance extends AtlasInstance
 	}
 
 	override function draw(camera:FlxCamera, index:Int, frameIndex:Int, parentMatrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode,
-			?antialiasing:Bool, ?shader:FlxShader)
+			?antialiasing:Bool, ?shader:FlxShader, ?wrapMode:Context3DWrapMode, ?depthCompareMode:Context3DCompareMode)
 	{
 		if (_dirty)
 		{
@@ -112,7 +114,7 @@ class TextFieldInstance extends AtlasInstance
 			_dirty = false;
 		}
 
-		super.draw(camera, index, frameIndex, parentMatrix, transform, blend, antialiasing, shader);
+		super.draw(camera, index, frameIndex, parentMatrix, transform, blend, antialiasing, shader, wrapMode, depthCompareMode);
 	}
 
 	override function destroy()

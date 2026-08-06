@@ -15,6 +15,8 @@ import flixel.math.FlxRect;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.util.FlxDestroyUtil;
 import openfl.display.BlendMode;
+import openfl.display3D.Context3DWrapMode;
+import openfl.display3D.Context3DCompareMode;
 import openfl.geom.ColorTransform;
 import openfl.media.Sound;
 import openfl.utils.Assets;
@@ -392,7 +394,7 @@ class Frame implements IFlxDestroyable
 	private static var __isDirtyCall:Bool = false;
 
 	public function draw(camera:FlxCamera, currentFrame:Int, parentMatrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?antialiasing:Bool,
-			?shader:FlxShader):Void
+			?shader:FlxShader, ?wrapMode:Context3DWrapMode, ?depthCompareMode:Context3DCompareMode):Void
 	{
 		var blend = Blend.resolve(this.blend, blend);
 
@@ -408,22 +410,22 @@ class Frame implements IFlxDestroyable
 			if (bakedFrame != null)
 			{
 				if (bakedFrame.visible)
-					bakedFrame.draw(camera, currentFrame, this.index, parentMatrix, transform, blend, antialiasing, shader);
+					bakedFrame.draw(camera, currentFrame, this.index, parentMatrix, transform, blend, antialiasing, shader, wrapMode, depthCompareMode);
 				return;
 			}
 		}
 
-		_drawElements(camera, currentFrame, parentMatrix, transform, blend, antialiasing, shader);
+		_drawElements(camera, currentFrame, parentMatrix, transform, blend, antialiasing, shader, wrapMode, depthCompareMode);
 	}
 
 	@:allow(animate.internal.FilterRenderer)
 	inline function _drawElements(camera:FlxCamera, currentFrame:Int, parentMatrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?antialiasing:Bool,
-			?shader:FlxShader)
+			?shader:FlxShader, ?wrapMode:Context3DWrapMode, ?depthCompareMode:Context3DCompareMode)
 	{
 		for (element in elements)
 		{
 			if (element.visible)
-				element.draw(camera, currentFrame, this.index, parentMatrix, transform, blend, antialiasing, shader);
+				element.draw(camera, currentFrame, this.index, parentMatrix, transform, blend, antialiasing, shader, wrapMode, depthCompareMode);
 		}
 	}
 

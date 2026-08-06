@@ -11,6 +11,8 @@ import flixel.math.FlxRect;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.util.FlxDestroyUtil;
 import openfl.display.BlendMode;
+import openfl.display3D.Context3DWrapMode;
+import openfl.display3D.Context3DCompareMode;
 import openfl.geom.ColorTransform;
 
 using flixel.util.FlxColorTransformUtil;
@@ -43,7 +45,7 @@ class FlxSpriteElement extends FlxTypedElement<FlxSprite>
 	}
 
 	override function applyObjectTransform(camera:FlxCamera, parentMatrix:FlxMatrix, transform:ColorTransform, blend:BlendMode, antialiasing:Bool,
-			shader:FlxShader)
+			shader:FlxShader, wrapMode:Context3DWrapMode, depthCompareMode:Context3DCompareMode)
 	{
 		var hasTransform = transform != null;
 		if (hasTransform)
@@ -75,7 +77,7 @@ class FlxSpriteElement extends FlxTypedElement<FlxSprite>
 		_point.set(basic.x, basic.y);
 		_angle = basic.angle;
 
-		super.applyObjectTransform(camera, parentMatrix, transform, blend, antialiasing, shader);
+		super.applyObjectTransform(camera, parentMatrix, transform, blend, antialiasing, shader, wrapMode, depthCompareMode);
 
 		var x = parentMatrix.transformX(basic.x, basic.y);
 		var y = parentMatrix.transformY(basic.x, basic.y);
@@ -118,12 +120,12 @@ class FlxSpriteElement extends FlxTypedElement<FlxSprite>
 	}
 
 	override function draw(camera:FlxCamera, index:Int, frameIndex:Int, parentMatrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode,
-			?antialiasing:Bool, ?shader:FlxShader)
+			?antialiasing:Bool, ?shader:FlxShader, ?wrapMode:Context3DWrapMode, ?depthCompareMode:Context3DCompareMode)
 	{
 		if (basic == null || basic.alpha <= 0)
 			return;
 
-		super.draw(camera, index, frameIndex, parentMatrix, transform, blend, antialiasing, shader);
+		super.draw(camera, index, frameIndex, parentMatrix, transform, blend, antialiasing, shader, wrapMode, depthCompareMode);
 	}
 
 	override function getObjectBounds(?result:FlxRect):FlxRect
@@ -159,7 +161,8 @@ class FlxTypedElement<T:FlxBasic> extends Element
 		_camera = null;
 	}
 
-	function applyObjectTransform(camera:FlxCamera, parentMatrix:FlxMatrix, transform:ColorTransform, blend:BlendMode, antialiasing:Bool, shader:FlxShader)
+	function applyObjectTransform(camera:FlxCamera, parentMatrix:FlxMatrix, transform:ColorTransform, blend:BlendMode, antialiasing:Bool, shader:FlxShader,
+			wrapMode:Context3DWrapMode, depthCompareMode:Context3DCompareMode)
 	{
 		basic.camera = camera;
 	}
@@ -170,7 +173,7 @@ class FlxTypedElement<T:FlxBasic> extends Element
 	}
 
 	override function draw(camera:FlxCamera, index:Int, frameIndex:Int, parentMatrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode,
-			?antialiasing:Bool, ?shader:FlxShader)
+			?antialiasing:Bool, ?shader:FlxShader, ?wrapMode:Context3DWrapMode, ?depthCompareMode:Context3DCompareMode)
 	{
 		if (basic == null || !basic.visible)
 			return;
@@ -180,7 +183,7 @@ class FlxTypedElement<T:FlxBasic> extends Element
 		if (active)
 			basic.update(FlxG.elapsed);
 
-		applyObjectTransform(camera, parentMatrix, transform, blend, antialiasing, shader);
+		applyObjectTransform(camera, parentMatrix, transform, blend, antialiasing, shader, wrapMode, depthCompareMode);
 
 		basic.draw();
 
