@@ -9,6 +9,8 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.util.FlxDestroyUtil;
 import openfl.display.BlendMode;
+import openfl.display3D.Context3DWrapMode;
+import openfl.display3D.Context3DCompareMode;
 import openfl.geom.ColorTransform;
 
 using flixel.util.FlxColorTransformUtil;
@@ -21,6 +23,7 @@ class FlxSpriteElement extends FlxTypedElement<FlxSprite>
 	var _point:FlxPoint = null;
 	var _screenPoint:FlxPoint = null;
 	var _angle:Float = 0.0;
+	var _wrapMode:Context3DWrapMode = null;
 
 	public function new(?sprite:FlxSprite)
 	{
@@ -36,7 +39,7 @@ class FlxSpriteElement extends FlxTypedElement<FlxSprite>
 		super.destroy();
 		_colorTransform = null;
 		_point = FlxDestroyUtil.put(_point);
-		_point = FlxDestroyUtil.put(_screenPoint);
+		_screenPoint = FlxDestroyUtil.put(_screenPoint);
 	}
 
 	override function applyObjectTransform(camera:FlxCamera, parentMatrix:FlxMatrix, ?command:AnimateDrawCommand)
@@ -64,6 +67,7 @@ class FlxSpriteElement extends FlxTypedElement<FlxSprite>
 		_angle = basic.angle;
 		_blend = basic.blend;
 		_antialiasing = basic.antialiasing;
+		_wrapMode = basic.wrapMode;
 
 		AnimateDrawCommand.copyTransform(_colorTransform, basic.colorTransform);
 
@@ -87,6 +91,7 @@ class FlxSpriteElement extends FlxTypedElement<FlxSprite>
 		basic.blend = command.blend;
 		basic.antialiasing = basic.antialiasing || command.antialiasing;
 		basic.camera = camera;
+		basic.wrapMode = command.wrapMode;
 	}
 
 	override function resetObjectTransform()
@@ -98,6 +103,7 @@ class FlxSpriteElement extends FlxTypedElement<FlxSprite>
 		basic.blend = _blend;
 		basic.camera = _camera;
 		basic.antialiasing = _antialiasing;
+		basic.wrapMode = _wrapMode;
 
 		var transform = basic.colorTransform;
 		transform.redMultiplier = _colorTransform.redMultiplier;

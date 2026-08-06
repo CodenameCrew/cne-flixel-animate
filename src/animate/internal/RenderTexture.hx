@@ -13,6 +13,8 @@ import openfl.Lib;
 import openfl.display.BitmapData;
 import openfl.display.BlendMode;
 import openfl.display.OpenGLRenderer;
+import openfl.display3D.Context3DWrapMode;
+import openfl.display3D.Context3DCompareMode;
 import openfl.display3D.Context3D;
 import openfl.display3D.textures.RectangleTexture;
 import openfl.geom.ColorTransform;
@@ -52,7 +54,7 @@ class RenderTexture implements IFlxDestroyable
 	}
 
 	public function draw(?parent:FlxSprite, camera:FlxCamera, matrix:FlxMatrix, ?colorTransform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool,
-			?shader:FlxShader):Void
+			?shader:FlxShader, ?wrapMode:Context3DWrapMode, ?depthCompareMode:Context3DCompareMode):Void
 	{
 		var frame:FlxFrame = graphic.imageFrame.frame;
 
@@ -71,7 +73,10 @@ class RenderTexture implements IFlxDestroyable
 		frame.prepareMatrix(_matrix);
 		_matrix.concat(matrix);
 
-		camera.drawPixels(frame, graphic.bitmap, _matrix, colorTransform, blend, smoothing, shader);
+		if (parent.layer != null)
+			parent.layer.drawPixels(parent, camera, frame, graphic.bitmap, _matrix, colorTransform, blend, smoothing, shader, wrapMode, depthCompareMode);
+		else
+			camera.drawPixels(frame, graphic.bitmap, _matrix, colorTransform, blend, smoothing, shader, wrapMode, depthCompareMode);
 	}
 
 	public function destroy():Void
