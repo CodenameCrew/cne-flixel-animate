@@ -118,7 +118,17 @@ class AtlasInstance extends AnimateElement<AtlasInstanceJson>
 		#if flash
 		drawPixelsFlash(camera, _mat, drawCommand.transform, drawCommand.blend, drawCommand.antialiasing);
 		#else
-		camera.drawPixels(frame, null, _mat, drawCommand.transform, drawCommand.blend, drawCommand.antialiasing, drawCommand.shader);
+		final parentSprite = drawCommand.parentSprite;
+		if (parentSprite != null && parentSprite.layer != null)
+		{
+			parentSprite.layer.drawPixels(parentSprite, camera, frame, null, _mat, drawCommand.transform, drawCommand.blend,
+				drawCommand.antialiasing, drawCommand.shader, drawCommand.wrapMode, drawCommand.depthCompareMode);
+		}
+		else
+		{
+			camera.drawPixels(frame, null, _mat, drawCommand.transform, drawCommand.blend, drawCommand.antialiasing, drawCommand.shader,
+				drawCommand.wrapMode, drawCommand.depthCompareMode);
+		}
 		#end
 
 		#if FLX_DEBUG

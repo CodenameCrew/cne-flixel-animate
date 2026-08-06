@@ -6,6 +6,8 @@ import flixel.math.FlxMatrix;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.util.FlxDestroyUtil;
 import openfl.display.BlendMode;
+import openfl.display3D.Context3DWrapMode;
+import openfl.display3D.Context3DCompareMode;
 import openfl.geom.ColorTransform;
 
 using flixel.util.FlxColorTransformUtil;
@@ -21,6 +23,8 @@ class AnimateDrawCommand implements IFlxDestroyable
 	public var blend:Null<BlendMode> = null;
 	public var antialiasing:Null<Bool> = false;
 	public var shader:Null<FlxShader> = null;
+	public var wrapMode:Null<Context3DWrapMode> = null;
+	public var depthCompareMode:Null<Context3DCompareMode> = null;
 	public var onSymbolDraw:(symbol:SymbolInstance, command:AnimateDrawCommand) -> Void = null;
 
 	public function new() {}
@@ -55,12 +59,15 @@ class AnimateDrawCommand implements IFlxDestroyable
 			this.transform = element.transform;
 
 			if (Frame.__isDirtyCall)
-				this.blend = NORMAL
+				this.blend = NORMAL;
 			else
 				this.blend = element.blend;
 
+			this.shader = element.shader;
+			this.wrapMode = element.wrapMode;
+
+			this.depthCompareMode = null;
 			this.antialiasing = true;
-			this.shader = null;
 			this.onSymbolDraw = null;
 			return;
 		}
@@ -90,10 +97,16 @@ class AnimateDrawCommand implements IFlxDestroyable
 		else
 			this.shader = command.shader;
 
+		// prepare cne modification properties
+		this.wrapMode = element.wrapMode ?? command.wrapMode;
+
 		// prepare other values
 		this.parentSprite = command.parentSprite;
 		this.antialiasing = command.antialiasing;
 		this.onSymbolDraw = command.onSymbolDraw;
+
+		// prepare other values but cne modification
+		this.depthCompareMode = command.depthCompareMode;
 	}
 
 	public function prepareFrameCommand(frame:Frame)
