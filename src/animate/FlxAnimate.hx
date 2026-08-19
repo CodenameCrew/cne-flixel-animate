@@ -322,8 +322,7 @@ class FlxAnimate extends FlxSprite
 		if (frameOffsetAngle != null && frameOffsetAngle != angle)
 		{
 			var angleOff = (frameOffsetAngle - angle) * FlxAngle.TO_RAD;
-			var cos = Math.cos(angleOff);
-			var sin = Math.sin(angleOff);
+			var cos = Math.cos(angleOff), sin = Math.sin(angleOff);
 			// cos doesnt need to be negated
 			_matrix.rotateWithTrig(cos, -sin);
 			_matrix.translate(-frameOffset.x, -frameOffset.y);
@@ -355,11 +354,13 @@ class FlxAnimate extends FlxSprite
 			matrix.concat(library.matrix);
 		}
 
-		getScreenPosition(_point, camera).subtractPoint(offset).add(origin.x, origin.y);
+		getScreenPosition(_point, camera).subtractPoint(offset).addPoint(origin);
 		matrix.translate(_point.x, _point.y);
 
 		if (isPixelPerfectRender(camera))
 			preparePixelPerfectMatrix(matrix);
+
+		doAdditionalMatrixStuff(matrix, camera);
 	}
 
 	function preparePixelPerfectMatrix(matrix:FlxMatrix):Void
