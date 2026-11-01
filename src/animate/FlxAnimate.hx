@@ -230,18 +230,51 @@ class FlxAnimate extends FlxSprite
 		#end
 	}
 
-	function drawAnimate(camera:FlxCamera):Void
-	{
-		final willUseRenderTexture = checkRenderTexture();
-		final matrix = _matrix;
-		matrix.identity();
+	/**
+	 * Set by `getScreenBounds` after it builds the draw matrix for a camera.
+	 * `draw` culls with `isOnScreen` right before calling `drawAnimate` for the same camera,
+	 * so the matrix in `_matrix` can be reused instead of rebuilding the whole chain a second time.
+	 */
+	var _drawMatrixFromCull:Bool = false;
+	var _drawMatrixCamera:FlxCamera = null;
 
-		@:privateAccess
-		var bounds = timeline._bounds;
+	/**
+	 * Prepares `_matrix` for `drawAnimate`, reusing the cull pass matrix when it is still valid.
+	 * @return True if the matrix was reused, false if it was rebuilt from scratch.
+	 */
+	function prepareAnimateDrawMatrix(matrix:FlxMatrix, camera:FlxCamera, bounds:FlxRect, willUseRenderTexture:Bool):Bool
+	{
+		final reuse = _drawMatrixFromCull && _drawMatrixCamera == camera && !isPixelPerfectRender(camera);
+		_drawMatrixFromCull = false;
+		_drawMatrixCamera = null;
+
+		if (reuse)
+		{
+			if (!willUseRenderTexture)
+			{
+				matrix.tx -= bounds.x * matrix.a + bounds.y * matrix.c;
+				matrix.ty -= bounds.x * matrix.b + bounds.y * matrix.d;
+			}
+			return true;
+		}
+
+		matrix.identity();
 		if (!willUseRenderTexture)
 			matrix.translate(-bounds.x, -bounds.y);
 
 		prepareAnimateMatrix(matrix, camera, bounds);
+		return false;
+	}
+
+	function drawAnimate(camera:FlxCamera):Void
+	{
+		final willUseRenderTexture = checkRenderTexture();
+		final matrix = _matrix;
+
+		@:privateAccess
+		var bounds = timeline._bounds;
+
+		prepareAnimateDrawMatrix(matrix, camera, bounds, willUseRenderTexture);
 
 		if (renderStage)
 			drawStage(camera);
@@ -261,39 +294,52 @@ class FlxAnimate extends FlxSprite
 		#if !flash
 		if (willUseRenderTexture)
 		{
-			if (_renderTexture == null)
-				_renderTexture = new RenderTexture(Math.ceil(bounds.width), Math.ceil(bounds.height));
-
-			if (_renderTextureDirty)
-			{
-				final previousDepthCompareMode = command.depthCompareMode;
-				command.transform = null;
-				command.blend = NORMAL;
-				command.shader = null;
-				command.wrapMode = null;
-				command.depthCompareMode = null;
-
-				_renderTexture.init(Math.ceil(bounds.width), Math.ceil(bounds.height));
-				_renderTexture.drawToCamera((camera, matrix) ->
-				{
-					matrix.translate(-bounds.x, -bounds.y);
-					timeline.draw(camera, matrix, command);
-				});
-				_renderTexture.render();
-
-				_renderTextureDirty = false;
-
-				command.depthCompareMode = previousDepthCompareMode;
-			}
-
-			_renderTexture.draw(this, camera, matrix, colorTransform, blend, antialiasing, shaderEnabled ? shader : null,
-				wrapMode, command.depthCompareMode);
+			setupRenderTexture(camera, bounds, command, matrix);
+			drawRenderTexture(camera, matrix, command);
 		}
 		else
 		#end
 		{
 			timeline.draw(camera, matrix, command);
 		}
+	}
+
+	function setupRenderTexture(camera:FlxCamera, bounds:FlxRect, ?command:AnimateDrawCommand, matrix:FlxMatrix):Void
+	{
+		if (_renderTexture == null)
+			_renderTexture = new RenderTexture(Math.ceil(bounds.width), Math.ceil(bounds.height));
+
+		if (_renderTextureDirty)
+		{
+			final previousDepthCompareMode = command?.depthCompareMode;
+			if (command != null)
+			{
+				command.transform = null;
+				command.blend = NORMAL;
+				command.shader = null;
+				command.wrapMode = null;
+				command.depthCompareMode = null;
+			}
+
+			_renderTexture.init(Math.ceil(bounds.width), Math.ceil(bounds.height));
+			_renderTexture.drawToCamera(renderRTT.bind(_, _, bounds, command));
+			_renderTexture.render();
+			_renderTextureDirty = false;
+
+			if (command != null) command.depthCompareMode = previousDepthCompareMode;
+		}
+	}
+
+	function renderRTT(camera:FlxCamera, matrix:FlxMatrix, bounds:FlxRect, command:AnimateDrawCommand):Void
+	{
+		matrix.translate(-bounds.x, -bounds.y);
+		timeline.draw(camera, matrix, command);
+	}
+
+	function drawRenderTexture(camera:FlxCamera, matrix:FlxMatrix, ?command:AnimateDrawCommand):Void
+	{
+		_renderTexture.draw(this, camera, matrix, colorTransform, blend, antialiasing, shaderEnabled ? shader : null,
+			wrapMode, command?.depthCompareMode);
 	}
 
 	public var onSymbolDraw:Null<(symbol:SymbolInstance, command:AnimateDrawCommand) -> Void>;
@@ -539,6 +585,9 @@ class FlxAnimate extends FlxSprite
 
 		isAnimate ? prepareAnimateMatrix(matrix, camera, timeline._bounds) : prepareDrawMatrix(matrix, camera);
 
+		_drawMatrixFromCull = isAnimate;
+		_drawMatrixCamera = camera;
+
 		if (isAnimate && renderStage)
 		{
 			final stageRect = this.library.stageRect;
@@ -551,6 +600,33 @@ class FlxAnimate extends FlxSprite
 		return rect;
 	}
 	#end
+
+	static var _frameBoundsMatrix:FlxMatrix = new FlxMatrix();
+
+	/**
+	 * Returns the screen bounds of the current frame.
+	 *
+	 * @param rect		Optional, the rectangle used to input the final calculated values.
+	 * @param camera	Optional, the camera to calculate bounds for, uses the default camera if ``null``.
+	 * @return			``FlxRect`` with the current frame's screen bounds.
+	 */
+	public function getCurrentFrameBounds(?rect:FlxRect, ?camera:FlxCamera):FlxRect
+	{
+		if (!isAnimate)
+			return getScreenBounds(rect, camera);
+
+		if (camera == null)
+			camera = #if (flixel >= "6.0.0") getDefaultCamera() #else FlxG.camera #end;
+
+		final bounds = timeline._bounds;
+		final matrix = _frameBoundsMatrix;
+		matrix.identity();
+		matrix.translate(-bounds.x, -bounds.y);
+		prepareAnimateMatrix(matrix, camera, bounds);
+
+		rect = timeline.getBounds(animation.frameIndex, false, rect, null, true, true);
+		return Timeline.applyMatrixToRect(rect, matrix);
+	}
 
 	function getAnimateOrigin(?result:FlxPoint):FlxPoint
 	{

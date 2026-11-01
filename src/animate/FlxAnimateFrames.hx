@@ -302,12 +302,15 @@ class FlxAnimateFrames extends FlxAtlasFrames
 		return list.filter(filter);
 	}
 
-	static function getGraphic(path:String):FlxGraphic
+	static function getGraphic(path:String, ?key:String):FlxGraphic
 	{
-		if (FlxG.bitmap.checkCache(path))
-			return FlxG.bitmap.get(path);
+		if (key == null)
+			key = path;
 
-		return FlxG.bitmap.add(FlxAnimateAssets.getBitmapData(path), false, path);
+		if (FlxG.bitmap.checkCache(key))
+			return FlxG.bitmap.get(key);
+
+		return FlxG.bitmap.add(FlxAnimateAssets.getBitmapData(path), false, key);
 	}
 
 	var _symbolDictionary:Null< #if flash Array<SymbolJson> #else Vector<SymbolJson> #end>;
@@ -348,13 +351,15 @@ class FlxAnimateFrames extends FlxAtlasFrames
 		var spritemapList = listWithFilter(path, (file) -> file.startsWith("spritemap"), false);
 		var jsonList = spritemapList.filter((file) -> file.endsWith(".json"));
 
+		var jsonI:Int = 0;
 		for (sm in jsonList)
 		{
+			jsonI++;
 			var id = sm.split("spritemap")[1].split(".")[0];
 			var imageFile = spritemapList.filter((file) -> file.startsWith('spritemap$id') && !file.endsWith(".json"))[0];
 
 			spritemaps.push({
-				source: getGraphic('$path/$imageFile'),
+				source: getGraphic('$path/$imageFile', (jsonList.length > 1 && key != null) ? '$key-$jsonI' : key),
 				json: getTextFromPath('$path/$sm')
 			});
 		}
