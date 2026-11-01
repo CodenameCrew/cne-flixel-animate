@@ -726,6 +726,6 @@ class FilterRenderer
 		return baseBounds;
 	}
 
-	public static final matrixPool:ObjectPool<FlxMatrix> = new ObjectPool<FlxMatrix>(() -> new FlxMatrix(), (m) -> m.identity());
-	public static final cameraPool:ObjectPool<FlxCamera> = new ObjectPool<FlxCamera>(() -> new FlxCamera(), (c) -> c);
+	public static final matrixPool:ObjectPool<FlxMatrix> = new ObjectPool<FlxMatrix>(() -> return new FlxMatrix(), (m) -> m.identity());
+	public static final cameraPool:ObjectPool<FlxCamera> = new ObjectPool<FlxCamera>(() -> return new FlxCamera(), (c) -> c);
 }

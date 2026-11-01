@@ -157,7 +157,7 @@ class FlxAnimateFrames extends FlxAtlasFrames
 
 		for (collection in addedCollections)
 		{
-			if (collection.dictionary.exists(name))
+			if (collection != null && collection.dictionary != null && collection.dictionary.exists(name))
 				return collection.dictionary.get(name);
 		}
 
@@ -258,6 +258,12 @@ class FlxAnimateFrames extends FlxAtlasFrames
 				}
 			}
 
+			@:privateAccess
+			if (!isAtlasDestroyed && (cachedAtlas.timeline.layers == null || cachedAtlas.timeline.layers.length <= 0 || cachedAtlas.timeline._bounds == null))
+			{
+				isAtlasDestroyed = true;
+			}
+
 			// Destroy previously cached atlas if incomplete, and create a new instance
 			if (isAtlasDestroyed)
 			{
@@ -277,9 +283,12 @@ class FlxAnimateFrames extends FlxAtlasFrames
 		return _fromAnimateInput(animate, spritemaps, metadata, key, settings);
 	}
 
-	static function getTextFromPath(path:String):String
+	static function getTextFromPath(path:String):Null<String>
 	{
-		return FlxAnimateAssets.getText(path).replace(String.fromCharCode(0xFEFF), "");
+		// getText() returns null if the asset could not be fetched.
+		var text:Null<String> = FlxAnimateAssets.getText(path);
+		if (text == null) return null;
+		return text.replace(String.fromCharCode(0xFEFF), "");
 	}
 
 	static function listWithFilter(path:String, filter:String->Bool, includeSubDirectories:Bool = false)
