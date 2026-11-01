@@ -34,7 +34,6 @@ class RenderTexture implements IFlxDestroyable
 	public var graphic(default, null):FlxGraphic;
 
 	var _renderer:OpenGLRenderer;
-	var _bitmaps:Map<String, BitmapData>;
 	var _currentBitmap:BitmapData;
 	var _camera:FlxCamera;
 	var _matrix:FlxMatrix;
@@ -46,7 +45,6 @@ class RenderTexture implements IFlxDestroyable
 		_renderer.__worldTransform = new Matrix();
 		_renderer.__worldColorTransform = new ColorTransform();
 
-		_bitmaps = [];
 		_camera = new FlxCamera();
 		_matrix = FilterRenderer.matrixPool.get();
 
@@ -84,14 +82,6 @@ class RenderTexture implements IFlxDestroyable
 		_renderer.__cleanup();
 		_renderer = null;
 
-		for (bitmap in _bitmaps.iterator())
-		{
-			if (bitmap.__texture != null)
-				bitmap.__texture.dispose();
-			bitmap.dispose();
-		}
-
-		_bitmaps = null;
 		_currentBitmap = null;
 
 		_camera = FlxDestroyUtil.destroy(_camera);
@@ -181,18 +171,15 @@ class RenderTexture implements IFlxDestroyable
 
 	function _prepareTexture(width:Int, height:Int):Void
 	{
-		var requireTexture = _currentBitmap == null || (_currentBitmap.width != width || _currentBitmap.height != height);
-		if (!requireTexture)
-			return;
+		if (_currentBitmap == null)
+		{
+			_currentBitmap = BitmapData.fromContext(FlxG.stage.context3D, width, height);
+		}
+		else
+		{
+			_currentBitmap.resize(width, height);
+		}
 
-		final id:String = Std.string(width) + 'x' + Std.string(height);
-
-		if (!_bitmaps.exists(id))
-			_bitmaps.set(id, BitmapData.fromTexture(FlxG.stage.context3D.createRectangleTexture(width, height, BGRA, true)));
-
-		_currentBitmap = _bitmaps.get(id);
-
-		if (graphic == null)
-			graphic = FlxGraphic.fromBitmapData(_currentBitmap, false, null, false);
+		if (graphic == null) graphic = FlxGraphic.fromBitmapData(_currentBitmap, false, null, false);
 	}
 }
